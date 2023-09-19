@@ -1,5 +1,7 @@
 package com.rest.core.controller;
 
+import com.rest.core.dto.PostSchoolDTO;
+import com.rest.core.dto.SchoolDTO;
 import com.rest.core.dto.StudentDTO;
 import com.rest.core.entity.Student;
 import com.rest.core.service.StudentService;
@@ -62,4 +64,16 @@ public class StudentController {
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
+    @PostMapping(value = "/callSchoolPostApi")
+    public ResponseEntity<Object> callSchoolPostApi(@RequestBody PostSchoolDTO postSchoolDTO) {
+        try {
+            SchoolDTO schoolDTO = studentService.callSchoolPostApi(postSchoolDTO);
+            if (schoolDTO != null) {
+                return new ResponseEntity<>(schoolDTO, HttpStatus.OK);
+            }
+        } catch (Exception e) {
+            log.error("Error save school : ", e);
+        }
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
 }

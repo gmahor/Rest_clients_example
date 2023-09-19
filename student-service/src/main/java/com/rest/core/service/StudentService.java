@@ -1,15 +1,19 @@
 package com.rest.core.service;
 
+import com.rest.core.dto.PostSchoolDTO;
 import com.rest.core.dto.SchoolDTO;
 import com.rest.core.dto.StudentDTO;
 import com.rest.core.entity.Student;
 import com.rest.core.repository.StudentRepository;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -25,15 +29,19 @@ public class StudentService {
 
     private final WebClient webClient;
 
+    private final HttpServletResponse httpServletResponse;
+
     @Autowired
     public StudentService(StudentRepository studentRepository,
                           RestTemplate restTemplate,
                           SchoolClientService schoolClientService,
-                          WebClient webClient) {
+                          WebClient webClient,
+                          HttpServletResponse httpServletResponse) {
         this.studentRepository = studentRepository;
         this.restTemplate = restTemplate;
         this.schoolClientService = schoolClientService;
         this.webClient = webClient;
+        this.httpServletResponse = httpServletResponse;
     }
 
 
@@ -81,6 +89,16 @@ public class StudentService {
 
     public List<Student> findAllStudentsBySchool(Integer schoolId) {
         return studentRepository.findAllBySchoolId(schoolId);
+    }
+
+    public SchoolDTO callSchoolPostApi(PostSchoolDTO schoolDTO) {
+        return webClient.post()
+                .uri("/saveSchool")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body(Mono.just(schoolDTO), PostSchoolDTO.class)
+                .retrieve()
+                .bodyToMono(SchoolDTO.class).block();
     }
 
 }
